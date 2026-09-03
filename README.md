@@ -5,10 +5,13 @@ Token-efficient agent output that does not cost result quality.
 Two layers, installed together on one AI coding agent. They are agent-agnostic: the
 mechanism is "a rule file the agent always reads", whatever your agent calls that.
 
-| Layer | Source | Job |
-|---|---|---|
-| Caveman at **lite** | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | Cut filler from replies |
-| Karpathy guidelines | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | Keep the plan and the stated assumptions |
+| Layer | Source | Pinned commit | Job |
+|---|---|---|---|
+| Caveman at **lite** | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | [`3b74643`](https://github.com/JuliusBrussee/caveman/commit/3b74643f4d910f496babd4e634b1ba7168816f14) (v2.5.0, 2026-09-02) | Cut filler from replies |
+| Karpathy guidelines | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | [`2c60614`](https://github.com/multica-ai/andrej-karpathy-skills/commit/2c606141936f1eeef17fa3043a72095b4765b9c2) (2026-04-20) | Keep the plan and the stated assumptions |
+
+Everything below describes those exact commits. Both upstreams move; re-read before
+adopting a newer one. In a hurry, read [CHEATSHEET.md](CHEATSHEET.md) instead.
 
 ## Why lite, and why only part of the caveman suite
 
@@ -57,7 +60,11 @@ Keep hedges that state real uncertainty; drop only decorative ones.
 ### 1. Caveman skills, at lite
 
 Install the five skills through whatever mechanism your agent uses (plugin,
-`npx skills add`, or copying `SKILL.md` files into its skills directory).
+`npx skills add`, or copying `SKILL.md` files into its skills directory). Pin to
+`3b74643f4d910f496babd4e634b1ba7168816f14`; if you install via a plugin marketplace,
+note that the caveman marketplace sets `"source": "./"` and auto-discovers every
+`skills/*/SKILL.md` with, in upstream's words, "no allowlist" — so an update pulls the
+excluded packages back in. Pin the plugin version or install the five skills directly.
 
 Set the level to `lite`. Caveman reads, in order: `CAVEMAN_DEFAULT_MODE` env var,
 repo-local `.caveman/config.json`, then the user config:
@@ -77,6 +84,18 @@ directly in the always-on rule file below. The skill is not the point; the rules
 
 Copy [`karpathy-guidelines.md`](karpathy-guidelines.md) into your agent's
 always-on rule file, or import it from there.
+
+That file is upstream's `CLAUDE.md` at `2c606141936f1eeef17fa3043a72095b4765b9c2` with
+[`karpathy-guidelines.patch`](karpathy-guidelines.patch) applied. To rebuild it from
+upstream rather than trusting the copy:
+
+```sh
+git clone https://github.com/multica-ai/andrej-karpathy-skills.git
+cd andrej-karpathy-skills
+git checkout 2c606141936f1eeef17fa3043a72095b4765b9c2
+patch -p1 < /path/to/karpathy-guidelines.patch
+# CLAUDE.md is now byte-identical to karpathy-guidelines.md
+```
 
 **Always-on is the requirement.** Delivered as a *skill*, the guidelines load only when
 the agent judges the skill description to match the task — and the upstream description
