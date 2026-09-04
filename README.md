@@ -13,13 +13,23 @@ mechanism is "a rule file the agent always reads", whatever your agent calls tha
 Everything below describes those exact commits. Both upstreams move; re-read before
 adopting a newer one. In a hurry, read [CHEATSHEET.md](CHEATSHEET.md) instead.
 
+This covers what the agent *writes*. For tools that change what the agent *reads* —
+CodeGraph, Context Mode, RTK — see [RETRIEVAL-TOOLS.md](RETRIEVAL-TOOLS.md). Its
+verdict is machine-dependent; do not copy it without reading the regime section.
+
 ## Why lite, and why only part of the caveman suite
 
 The caveman suite ships ~20 skills. Only the output-wording ones are safe for
 quality-sensitive work. Everything else changes *process*: it narrows scope, adds a
 stop condition, delegates to a smaller model, or rewrites what the agent reads.
 
-Install: `caveman`, `caveman-commit`, `caveman-review`, `caveman-help`, `caveman-stats`.
+Install: `caveman-commit`, `caveman-review`, `caveman-help`, `caveman-stats`.
+
+The `caveman` skill itself is the wording ruleset, and it is safe *as rules* — but the
+upstream `SKILL.md` body hardcodes "Default: **full**" and "No preamble, plan, or
+progress note", both of which this setup overrides. Put the lite rules in your
+always-on rule file (see the Karpathy section) rather than loading that body; a skill
+the agent may or may not load is the wrong carrier for a default.
 
 Do not install: `lean-build`, `verify-and-stop`, `surgical-patch`, `investigate-first`,
 `safe-refactor`, `migration`, `caveman-explore`, `caveman-compress`, `cavecrew` and its
@@ -55,16 +65,22 @@ it is what stops the "no look-ahead" failure mode.
 Same for hedging: caveman drops it, Karpathy wants "State your assumptions explicitly."
 Keep hedges that state real uncertainty; drop only decorative ones.
 
+The rule file also has to win against **tool** instructions, not only against
+caveman. Retrieval and compression tools inject text like "don't re-verify",
+"do not Read a file shown here", and "return: file path + 1-line description". The
+guidelines file carries a sentence making them subordinate; see
+[RETRIEVAL-TOOLS.md](RETRIEVAL-TOOLS.md) for why.
+
 ## Install
 
 ### 1. Caveman skills, at lite
 
-Install the five skills through whatever mechanism your agent uses (plugin,
+Install the four skills through whatever mechanism your agent uses (plugin,
 `npx skills add`, or copying `SKILL.md` files into its skills directory). Pin to
 `3b74643f4d910f496babd4e634b1ba7168816f14`; if you install via a plugin marketplace,
 note that the caveman marketplace sets `"source": "./"` and auto-discovers every
 `skills/*/SKILL.md` with, in upstream's words, "no allowlist" — so an update pulls the
-excluded packages back in. Pin the plugin version or install the five skills directly.
+excluded packages back in. Pin the plugin version or install the four skills directly.
 
 Set the level to `lite`. Caveman reads, in order: `CAVEMAN_DEFAULT_MODE` env var,
 repo-local `.caveman/config.json`, then the user config:
@@ -118,6 +134,11 @@ Changes** is dropped because it tells the agent to leave adjacent problems alone
 pulls in the same direction as the excluded scope-limiting skills. **Simplicity First**
 is trimmed to its senior-engineer test for the same reason.
 
+Two paragraphs are added above the principles: one making the guidelines outrank
+evidence-narrowing tool instructions, and one scoping "if unclear, ask" so that a
+batch the user has explicitly handed over and left does not stall on questions —
+decide, log the decision with its reason, and report at the end.
+
 ### 3. Remove conflicting instructions
 
 Grep your config for every place that sets a caveman level and change `full` to `lite`.
@@ -153,7 +174,7 @@ At `lite` this matters less, since articles are kept deliberately.
 ## Rollback
 
 One session: say "stop caveman" or `/caveman off`.
-Permanently: set `"defaultMode": "off"`, or uninstall the five skills. The Karpathy
+Permanently: set `"defaultMode": "off"`, or uninstall the four skills. The Karpathy
 guidelines are a plain rule file — delete the import line.
 
 ## Provenance
@@ -161,3 +182,11 @@ guidelines are a plain rule file — delete the import line.
 Derived from a nine-stage blind multi-agent review of the full caveman suite at commit
 `3b74643f4d910f496babd4e634b1ba7168816f14` (2026-09-02), reading every `SKILL.md`,
 the plugin hooks, the native pack, and the upstream benchmarks and issue threads.
+
+A second nine-stage review on 2026-09-04 covered CodeGraph, Context Mode, and RTK and
+produced [RETRIEVAL-TOOLS.md](RETRIEVAL-TOOLS.md) and the two added paragraphs in
+`karpathy-guidelines.md`. One caveman change came out of it: the upstream `caveman`
+skill body says "Default: **full**" and "No preamble, plan, or progress note", which
+contradicts this setup. If your agent loads that skill body, remove it and keep only
+the four wording skills (`-commit`, `-review`, `-help`, `-stats`). The lite wording
+rules belong in the rule file, not in a skill the agent may or may not load.

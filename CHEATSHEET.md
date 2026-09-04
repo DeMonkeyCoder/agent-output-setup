@@ -4,7 +4,10 @@
 
 From [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) @ `3b74643f4d910f496babd4e634b1ba7168816f14` (v2.5.0, 2026-09-02):
 
-    caveman  caveman-commit  caveman-review  caveman-help  caveman-stats
+    caveman-commit  caveman-review  caveman-help  caveman-stats
+
+The `caveman` skill body itself says "Default: **full**" and "No preamble, plan"; put
+the lite wording rules in your always-on rule file instead of loading that skill.
 
 ## Do not install
 
@@ -52,3 +55,12 @@ Load it from the agent's **always-on** rule file, not as a skill.
 
 Ask a fresh session: what caveman level is set, and does anything tell you to state a
 brief plan for multi-step tasks? Expect `lite` plus the quoted plan sentence.
+
+## Retrieval tools (CodeGraph, Context Mode, RTK)
+
+Off as always-on integrations; binaries kept for explicit use. Verdict is
+machine-dependent — CodeGraph's evidence applies to large repos (~500+ files), not
+small ones. See [RETRIEVAL-TOOLS.md](RETRIEVAL-TOOLS.md) before copying.
+
+Check a fresh session: ask it to name any MCP tools containing `codegraph` or `ctx_`.
+Expect `NONE`. Read the native session record for hooks that fired.
