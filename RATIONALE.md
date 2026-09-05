@@ -274,32 +274,39 @@ the model.
 **One agent's config can be another agent's input.** Cursor loads hooks from
 `~/.claude/settings.json` and runs them, merging them below its own. This was
 verified, not just read: a `PreToolUse` marker hook placed only in the Claude
-file fired during a Cursor CLI shell call, with no Cursor setting touched. A
-hook removed from Cursor's `hooks.json` but left in Claude Code's settings is
-still live in Cursor. The same shape appeared on the reviewed machine in a
-different pair: Claude Code's rule file had leaked into a Hermes profile
+file fired during a shell call in the Cursor CLI, and again in a fresh Cursor
+IDE install, with no Cursor setting touched in either case and the IDE's own
+Hooks tab reporting none configured. The documentation describes this as an
+opt-in; on the builds tested it was the default. A hook removed from Cursor's
+`hooks.json` but left in Claude Code's settings is still live in Cursor, and
+Cursor's UI will not show it. The same shape appeared on the reviewed machine
+in a different pair: Claude Code's rule file had leaked into a Hermes profile
 through a home-rooted path. This is why `SETUP.md` orders the Claude Code
 cleanup before Cursor's and why the verification step reads what reached the
-model rather than which file was edited.
+model rather than which file was edited or what a settings screen reports.
 
 ## What was and was not tested
 
-Claude Code, Codex, Grok CLI, Hermes, and the Cursor CLI were tested on a
-working machine: every removal was followed by a fresh-session probe and, where
-the agent keeps one, inspection of the native session record.
+Claude Code, Codex, Grok CLI, Hermes, the Cursor CLI, and the Cursor desktop
+IDE were tested on a working machine: every removal was followed by a
+fresh-session probe and, where the agent keeps one, inspection of the native
+session record.
 
-For Cursor, two documentation claims were tested directly and both held: a
-plain `.md` in `.cursor/rules/` is ignored while the same content as an
+For Cursor, three documentation claims were tested directly. Two held: a plain
+`.md` in `.cursor/rules/` is ignored while the same content as an
 `alwaysApply: true` `.mdc` loads, and Claude Code hooks fire inside Cursor.
-Two things were not tested. The Cursor IDE was not installed, so its User Rules
-and plugin surfaces are documentation-derived; the CLI shares the rule, MCP,
-and hook files, so the removal steps are the same, but the IDE's third-party
-config toggle was not exercised. And none of the three tools had been installed
-into Cursor on this machine, so their removal steps are from each tool's own
-install instructions rather than from undoing a real install.
+One did not hold as written: the third-party-config opt-in was not required
+for Claude hooks on either the CLI or the IDE. The IDE probe also showed the
+fork's brief-plan rule in effect unprompted — the agent opened with "Plan: …
+Verification: shell output plus tool catalog" before answering.
+
+One thing was not tested: none of the three tools had been installed into
+Cursor on this machine, so their removal steps are from each tool's own install
+instructions rather than from undoing a real install.
 
 A free Cursor plan cannot pin a model; the answering model is recorded in the
-native chat store and was `cursor-grok-4.5-high` for every probe here.
+native chat store and was `cursor-grok-4.5-high` for the CLI probes. The IDE
+showed `Cursor Grok 4.6 Medium` in its composer for its probe.
 
 ## The reversible experiment
 
