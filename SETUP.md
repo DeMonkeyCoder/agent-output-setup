@@ -157,7 +157,7 @@ Where the always-on rule file lives:
 | Codex | `~/.codex/AGENTS.md` | `@/absolute/path/karpathy-guidelines-fork.md` |
 | Grok CLI | `~/.grok/rules/` | drop the file in; every `*.md` there is always on |
 | Hermes | `agent.system_prompt`, or a plugin that registers a system-prompt section | see the Hermes notes below |
-| Cursor | `.cursor/rules/karpathy-guidelines-fork.mdc` | as a rule file |
+| Cursor | `.cursor/rules/karpathy-guidelines-fork.mdc` with `alwaysApply: true`, or `AGENTS.md` at the project root | see the Cursor notes below; a plain `.md` in `.cursor/rules/` is ignored |
 | anything else | its global instructions file | paste or import |
 
 ## Step 3 — Do not wire in retrieval or compression tools
@@ -246,6 +246,39 @@ Also search for any leftover text from step 3's tools: `codegraph`, `ctx_`,
   plain shell outside any agent. New CLI sessions pick changes up immediately.
 - Check memories: `grep -ci 'caveman full\|rtk\|codegraph' ~/.hermes/memories/*.md
   ~/.hermes/profiles/*/memories/*.md`.
+
+**Cursor**
+- Rule carrier: either a project `AGENTS.md` (plain markdown, always read), or a
+  `.cursor/rules/*.mdc` file whose frontmatter is exactly:
+  ```
+  ---
+  alwaysApply: true
+  ---
+  ```
+  followed by the fork text. Without that frontmatter, or with a `.md`
+  extension, Cursor silently ignores the file. Do not rely on `description`
+  matching for the fork — that is the coding-scoped skill problem again.
+- For the caveman wording rules, User Rules (Customize → Rules) apply across all
+  projects and are the right place; project rules apply per repository.
+- Caveman skills: `npx skills add JuliusBrussee/caveman -a cursor -s
+  caveman-commit caveman-help caveman-review caveman-stats`. Never `-s '*'`.
+- MCP: CodeGraph and Context Mode register in `~/.cursor/mcp.json` (global) or
+  `.cursor/mcp.json` (project). Remove their `mcpServers` entries, or leave
+  CodeGraph's for the large-repository case in step 3.
+- Hooks: `~/.cursor/hooks.json` and `.cursor/hooks.json`. Remove any
+  `beforeShellExecution`/`preToolUse` entry that runs `rtk`, and any
+  `context-mode hook` entry.
+- Context Mode's Cursor install is a local plugin symlinked at
+  `~/.cursor/plugins/local/context-mode`; remove the symlink and check
+  Settings → Plugins. Its README warns that a prior `hooks.json` install plus
+  the plugin double-fires every hook, so check both places.
+- **Cursor can load Claude Code's hooks.** With *Include third-party Plugins,
+  Skills, and other configs* enabled, Cursor reads `~/.claude/settings.json`
+  hooks and runs them. An RTK or Context Mode hook left in the Claude file
+  therefore re-enters Cursor even after Cursor's own `hooks.json` is clean.
+  Finish the Claude Code notes first, or disable that setting.
+- Verify in Customize → Hooks (configured and fired hooks) and the Hooks output
+  channel, plus the fresh-session questions below.
 
 ## Verify
 

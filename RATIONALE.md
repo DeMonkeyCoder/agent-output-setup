@@ -271,6 +271,27 @@ Mode's own mandatory instructions until that isolation was built. Every
 verification step now runs a fresh session and inspects what actually reached
 the model.
 
+**One agent's config can be another agent's input.** Cursor documents that,
+with third-party configs enabled, it loads hooks from `~/.claude/settings.json`
+and runs them, merging them below its own. A hook removed from Cursor's
+`hooks.json` but left in Claude Code's settings is still live in Cursor. The
+same shape appeared on the reviewed machine in a different pair: Claude Code's
+rule file had leaked into a Hermes profile through a home-rooted path. This is
+why `SETUP.md` orders the Claude Code cleanup before Cursor's and why the
+verification step reads what reached the model rather than which file was
+edited.
+
+## What was and was not tested
+
+Claude Code, Codex, Grok CLI, and Hermes were tested on a working machine:
+every removal was followed by a fresh-session probe and, where the agent keeps
+one, inspection of the native session record. The Cursor notes in `SETUP.md`
+are derived from Cursor's published documentation for rules, MCP, hooks, and
+third-party hook loading, and from each tool's own Cursor install
+instructions. Cursor was not installed on the reviewed machine, so those notes
+describe where the integrations live and how to remove them, not a measured
+result. Treat them as a checklist to verify, not a verified state.
+
 ## The reversible experiment
 
 A tool returns to always-on status on an agent only after this passes on that
