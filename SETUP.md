@@ -247,7 +247,8 @@ Also search for any leftover text from step 3's tools: `codegraph`, `ctx_`,
 - Check memories: `grep -ci 'caveman full\|rtk\|codegraph' ~/.hermes/memories/*.md
   ~/.hermes/profiles/*/memories/*.md`.
 
-**Cursor**
+**Cursor** (tested on the CLI, `cursor-agent` 2026.09.02; the IDE shares the
+same rule, MCP, and hook files)
 - Rule carrier: either a project `AGENTS.md` (plain markdown, always read), or a
   `.cursor/rules/*.mdc` file whose frontmatter is exactly:
   ```
@@ -255,11 +256,13 @@ Also search for any leftover text from step 3's tools: `codegraph`, `ctx_`,
   alwaysApply: true
   ---
   ```
-  followed by the fork text. Without that frontmatter, or with a `.md`
-  extension, Cursor silently ignores the file. Do not rely on `description`
-  matching for the fork — that is the coding-scoped skill problem again.
-- For the caveman wording rules, User Rules (Customize → Rules) apply across all
-  projects and are the right place; project rules apply per repository.
+  followed by the fork text. Verified: the same file with a `.md` extension in
+  `.cursor/rules/` is silently ignored (the agent answered NO when asked whether
+  it had the precedence sentence). Do not rely on `description` matching for
+  the fork — that is the coding-scoped skill problem again.
+- Caveman wording rules: a second `alwaysApply: true` `.mdc` beside the fork.
+  In the IDE, User Rules (Customize → Rules) apply across all projects; the CLI
+  has no user-level rules directory, so project rules are the carrier there.
 - Caveman skills: `npx skills add JuliusBrussee/caveman -a cursor -s
   caveman-commit caveman-help caveman-review caveman-stats`. Never `-s '*'`.
 - MCP: CodeGraph and Context Mode register in `~/.cursor/mcp.json` (global) or
@@ -267,18 +270,28 @@ Also search for any leftover text from step 3's tools: `codegraph`, `ctx_`,
   CodeGraph's for the large-repository case in step 3.
 - Hooks: `~/.cursor/hooks.json` and `.cursor/hooks.json`. Remove any
   `beforeShellExecution`/`preToolUse` entry that runs `rtk`, and any
-  `context-mode hook` entry.
+  `context-mode hook` entry. On a fresh install neither file exists; creating
+  them with `{"mcpServers": {}}` and `{"hooks": {}}` is harmless and makes the
+  intended state explicit.
 - Context Mode's Cursor install is a local plugin symlinked at
   `~/.cursor/plugins/local/context-mode`; remove the symlink and check
   Settings → Plugins. Its README warns that a prior `hooks.json` install plus
   the plugin double-fires every hook, so check both places.
-- **Cursor can load Claude Code's hooks.** With *Include third-party Plugins,
-  Skills, and other configs* enabled, Cursor reads `~/.claude/settings.json`
-  hooks and runs them. An RTK or Context Mode hook left in the Claude file
-  therefore re-enters Cursor even after Cursor's own `hooks.json` is clean.
-  Finish the Claude Code notes first, or disable that setting.
-- Verify in Customize → Hooks (configured and fired hooks) and the Hooks output
-  channel, plus the fresh-session questions below.
+- **Cursor runs Claude Code's hooks.** Verified on the CLI with no opt-in
+  touched: a `PreToolUse` hook placed only in `~/.claude/settings.json` fired
+  during a Cursor shell call, alongside Cursor's own `beforeShellExecution`
+  hook. An RTK or Context Mode hook left in the Claude file is therefore live
+  in Cursor even when Cursor's own `hooks.json` is empty. Finish the Claude Code
+  notes first. In the IDE this is governed by *Include third-party Plugins,
+  Skills, and other configs*; the CLI applied it by default.
+- Model pinning: free plans reject named models (`--model auto` only). The
+  model that answered is recorded in the native chat store under
+  `~/.config/cursor/chats/<workspace-hash>/<session-id>/store.db` as
+  `providerOptions.cursor.modelName`; read it from there rather than from the
+  `--model` flag.
+- Verify with the fresh-session questions below. The CLI's `--output-format
+  json` result carries `session_id`; the transcript for it is under
+  `~/.cursor/projects/<workspace>/agent-transcripts/<session-id>/`.
 
 ## Verify
 

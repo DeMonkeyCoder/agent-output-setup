@@ -1,8 +1,8 @@
 # agent-token-optimization
 
 Token-efficient output from AI coding agents, without paying for it in result
-quality. Agent-agnostic; tested on Claude Code, Codex, Grok CLI, and Hermes, with
-documentation-derived notes for Cursor.
+quality. Agent-agnostic; tested on Claude Code, Codex, Grok CLI, Hermes, and the
+Cursor CLI.
 
 Two files:
 

@@ -271,26 +271,35 @@ Mode's own mandatory instructions until that isolation was built. Every
 verification step now runs a fresh session and inspects what actually reached
 the model.
 
-**One agent's config can be another agent's input.** Cursor documents that,
-with third-party configs enabled, it loads hooks from `~/.claude/settings.json`
-and runs them, merging them below its own. A hook removed from Cursor's
-`hooks.json` but left in Claude Code's settings is still live in Cursor. The
-same shape appeared on the reviewed machine in a different pair: Claude Code's
-rule file had leaked into a Hermes profile through a home-rooted path. This is
-why `SETUP.md` orders the Claude Code cleanup before Cursor's and why the
-verification step reads what reached the model rather than which file was
-edited.
+**One agent's config can be another agent's input.** Cursor loads hooks from
+`~/.claude/settings.json` and runs them, merging them below its own. This was
+verified, not just read: a `PreToolUse` marker hook placed only in the Claude
+file fired during a Cursor CLI shell call, with no Cursor setting touched. A
+hook removed from Cursor's `hooks.json` but left in Claude Code's settings is
+still live in Cursor. The same shape appeared on the reviewed machine in a
+different pair: Claude Code's rule file had leaked into a Hermes profile
+through a home-rooted path. This is why `SETUP.md` orders the Claude Code
+cleanup before Cursor's and why the verification step reads what reached the
+model rather than which file was edited.
 
 ## What was and was not tested
 
-Claude Code, Codex, Grok CLI, and Hermes were tested on a working machine:
-every removal was followed by a fresh-session probe and, where the agent keeps
-one, inspection of the native session record. The Cursor notes in `SETUP.md`
-are derived from Cursor's published documentation for rules, MCP, hooks, and
-third-party hook loading, and from each tool's own Cursor install
-instructions. Cursor was not installed on the reviewed machine, so those notes
-describe where the integrations live and how to remove them, not a measured
-result. Treat them as a checklist to verify, not a verified state.
+Claude Code, Codex, Grok CLI, Hermes, and the Cursor CLI were tested on a
+working machine: every removal was followed by a fresh-session probe and, where
+the agent keeps one, inspection of the native session record.
+
+For Cursor, two documentation claims were tested directly and both held: a
+plain `.md` in `.cursor/rules/` is ignored while the same content as an
+`alwaysApply: true` `.mdc` loads, and Claude Code hooks fire inside Cursor.
+Two things were not tested. The Cursor IDE was not installed, so its User Rules
+and plugin surfaces are documentation-derived; the CLI shares the rule, MCP,
+and hook files, so the removal steps are the same, but the IDE's third-party
+config toggle was not exercised. And none of the three tools had been installed
+into Cursor on this machine, so their removal steps are from each tool's own
+install instructions rather than from undoing a real install.
+
+A free Cursor plan cannot pin a model; the answering model is recorded in the
+native chat store and was `cursor-grok-4.5-high` for every probe here.
 
 ## The reversible experiment
 
